@@ -30,20 +30,22 @@ def bisVal_csv(sDate, sTime, eDate, eTime, bis_thresh, time_thresh, filename ="t
     y_arr = []
     e_start = []
     e_end = []
+    time_array = []
 
     with open(filename, "r", newline='') as csvf:
         csvR = csv.reader(csvf)
         flag = 5 #random number for initialization - actual values are 1 and 0
         counter = 0
         event = 0
-        dnt_drop_arr = []
+
+
 
         #'row' variable is used to get each row of records from CSV file using for loop
         for row in csvR:
             # print(row)
             if row == ['Time', 'AVGBIS']:
                 continue
-            dnt_drop_arr.append(row[0]) # idk why
+
 
             # Using split() function we split the date and time which are both part of row[0] and store it in array 'rDT'
             # Note that this is done for each row
@@ -51,6 +53,7 @@ def bisVal_csv(sDate, sTime, eDate, eTime, bis_thresh, time_thresh, filename ="t
 
             #rDT[0] and rDT[1] are used to access date and time respectively
             print(rDT[0], rDT[1])
+            time_array.append(rDT[1][:-3])
 
             # Code to set value of flag to 1 if rDT[0] and rDT[1] are equal to start date and start time (i.e., sDate and sTime)
             if rDT[0].strip() == sDate.strip() and rDT[1].strip() == sTime.strip():
@@ -130,14 +133,21 @@ def bisVal_csv(sDate, sTime, eDate, eTime, bis_thresh, time_thresh, filename ="t
                     counter = 0
                 break
     csvf.close()
-    return event, x_arr, y_arr, e_start, e_end
+    return event, x_arr, y_arr, e_start, e_end,time_array
 
 
 
-def plot_bis(event, x_arr, y_arr, e_start, e_end, bis_thresh, time_thresh):
+def plot_bis(event, x_arr, y_arr, e_start, e_end, bis_thresh, time_thresh,time_array):
+
+    print("Time array: ", time_array)
     print("No of events: ", event)
     x_arr = np.array(x_arr)
     y_arr = np.array(y_arr)
+    my_xticks = time_array
+    fig, ax = plt.subplots(1, figsize=(50, 15))
+    ax.grid()
+    plt.xticks(rotation=75)
+    plt.xticks(x_arr, my_xticks)
     plt.plot(x_arr, y_arr)
     print(e_start)
     print(e_end)
@@ -150,10 +160,10 @@ def plot_bis(event, x_arr, y_arr, e_start, e_end, bis_thresh, time_thresh):
         plt.fill_between(x_arr, y_arr,color="red", where=(x_arr >= e_start[i]) & (x_arr <= e_end[i]))
 
 
-    # print(dnt_drop_arr)
+
     plt.xlabel('Timeline')
     plt.ylabel('AVGBIS')
-    plt.text(1, 90, f"Event Count: {event} \nAVGBIS Threshold: {bis_thresh} \nTime Tolerance: {time_thresh}", weight='bold', size=10 ,color='white' ,bbox={'facecolor': 'black', 'alpha': 0.5, 'pad': 10})
+    plt.text(1, 90, f"Event Count: {event} \nAVGBIS Threshold: {bis_thresh} \nTime Tolerance: {time_thresh}\nInitial Time: {time_array[0]}", weight='bold', size=10 ,color='white' ,bbox={'facecolor': 'black', 'alpha': 0.5, 'pad': 10})
     plt.show()
 
 # event, x_arr, y_arr, e_start, e_end = bisVal_csv(sDate, sTime, eDate, eTime, bis_thresh, time_thresh, csv_file)
